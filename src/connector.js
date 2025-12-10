@@ -1,16 +1,21 @@
 var mysql = require('mysql');
 
 var con = mysql.createConnection({
-    host: "localhost",      // or "127.0.0.1" if you prefer TCP
-    user: "nodeuser",
-    password: "StrongPassword123!", // use the password you created
-    database: "test",
-    multipleStatements: true
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    multipleStatements: true,
+    ssl: { rejectUnauthorized: false }   // IMPORTANT for Aiven MySQL
 });
 
 con.connect(function (err) {
-    if (err) return console.log("failed to connect to mysql server/ database", err);
-    else return console.log("connection established with Database!!!!");
+    if (err) {
+        console.log("failed to connect to mysql server/ database", err);
+    } else {
+        console.log("connection established with Database!!!!");
+    }
 });
 
 module.exports = con;
