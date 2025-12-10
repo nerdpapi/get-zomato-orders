@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const bodyParser = require("body-parser");
 const port = 8080
+const swaggerDocs = require("../swagger.js");
 
 // Parse JSON bodies (as sent by API clients)
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -19,6 +20,41 @@ function isPositiveIntegerString(val) {
 }
 
 // GET /api/orders with pagination
+
+/**
+ * @swagger
+ * /api/orders:
+ *   get:
+ *     summary: Get paginated list of orders
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of items to return (default = 10)
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: Items to skip (default = 0)
+ *     responses:
+ *       200:
+ *         description: A list of orders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ */
+
 app.get('/api/orders', (req, res) => {
   try {
     const { limit, offset } = req.query;
@@ -55,6 +91,8 @@ app.get('/api/orders', (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+swaggerDocs(app);
 
 app.listen(port, () => console.log(`App listening on port ${port}!`))
 
