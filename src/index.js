@@ -6,7 +6,6 @@ const createDatabase = require("./createDatabase");
 const app = express();
 const port = 8080;
 
-// ✅ Built-in body parsers (replace body-parser)
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
@@ -54,33 +53,16 @@ app.get("/health", (req, res) => {
  *     responses:
  *       200:
  *         description: List of orders
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                   title:
- *                     type: string
- *                   description:
- *                     type: string
  */
 app.get("/api/orders", (req, res) => {
   const { limit, offset } = req.query;
 
-  const finalLimit = isPositiveIntegerString(limit)
-    ? Number(limit)
-    : 10;
-
-  const finalOffset = isNonNegativeIntegerString(offset)
-    ? Number(offset)
-    : 0;
+  const finalLimit = isPositiveIntegerString(limit) ? Number(limit) : 10;
+  const finalOffset = isNonNegativeIntegerString(offset) ? Number(offset) : 0;
 
   con.query(
-    "SELECT * FROM orders LIMIT ? OFFSET ?",
+    //ORDER BY, makes pagination results consistent.
+    "SELECT * FROM orders ORDER BY _id LIMIT ? OFFSET ?",
     [finalLimit, finalOffset],
     (err, rows) => {
       if (err) {
@@ -96,7 +78,6 @@ app.get("/api/orders", (req, res) => {
 swaggerDocs(app);
 
 // ---------------- SERVER START ----------------
-// ✅ Start server even if DB is temporarily unavailable
 (async () => {
   try {
     await createDatabase();
