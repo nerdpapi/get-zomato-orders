@@ -1,37 +1,83 @@
 const express = require("express");
-const bodyParser = require("body-parser");
-const swaggerDocs = require("../swagger.js");
+const swaggerDocs = require("../swagger");
 const con = require("./connector");
 const seedDB = require("./seed");
 
 const app = express();
 const port = 8080;
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+// ✅ Built-in body parsers (replace body-parser)
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
-// Helpers
+// ---------------- HELPERS ----------------
 function isNonNegativeIntegerString(val) {
   return /^\d+$/.test(String(val));
 }
+
 function isPositiveIntegerString(val) {
   return /^\d+$/.test(String(val)) && Number(val) > 0;
 }
 
-// Health check
+// ---------------- ROUTES ----------------
+
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check
+ *     responses:
+ *       200:
+ *         description: Server is running
+ */
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Orders API
+/**
+ * @swagger
+ * /api/orders:
+ *   get:
+ *     summary: Get paginated list of orders
+ *     description: Returns orders with optional pagination
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           example: 0
+ *     responses:
+ *       200:
+ *         description: List of orders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ */
 app.get("/api/orders", (req, res) => {
   const { limit, offset } = req.query;
 
-  const finalLimit =
-    isPositiveIntegerString(limit) ? Number(limit) : 10;
-  const finalOffset =
-    isNonNegativeIntegerString(offset) ? Number(offset) : 0;
+  const finalLimit = isPositiveIntegerString(limit)
+    ? Number(limit)
+    : 10;
+
+  const finalOffset = isNonNegativeIntegerString(offset)
+    ? Number(offset)
+    : 0;
 
   con.query(
     "SELECT * FROM orders LIMIT ? OFFSET ?",
@@ -46,18 +92,22 @@ app.get("/api/orders", (req, res) => {
   );
 });
 
-// Swagger
+// ---------------- SWAGGER ----------------
 swaggerDocs(app);
 
-// Start server ONLY after DB ready
-seedDB()
-  .then(() => {
-    app.listen(port, () =>
-      console.log(`🚀 Server running on port ${port}`)
-    );
-  })
-  .catch(() => {
-    console.error("❌ Server not started due to DB error");
+// ---------------- SERVER START ----------------
+// ✅ Start server even if DB is temporarily unavailable
+(async () => {
+  try {
+    await seedDB();
+    console.log("✅ Database ready");
+  } catch (err) {
+    console.error("⚠️ Database not ready yet, continuing...", err.message);
+  }
+
+  app.listen(port, () => {
+    console.log(`🚀 Server running on port ${port}`);
   });
+})();
 
 module.exports = app;
