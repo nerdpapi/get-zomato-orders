@@ -15,7 +15,7 @@ const options = {
       { url: "https://get-zomato-orders.onrender.com", description: "Render" },
     ],
   },
-  apis: ["./src/index.js"],
+  apis: ["src/index.js"],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
