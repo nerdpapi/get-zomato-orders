@@ -1,7 +1,7 @@
 const express = require("express");
 const swaggerDocs = require("../swagger");
 const con = require("./connector");
-const seedDB = require("./seed");
+const createDatabase = require("./createDatabase");
 
 const app = express();
 const port = 8080;
@@ -99,7 +99,7 @@ swaggerDocs(app);
 // ✅ Start server even if DB is temporarily unavailable
 (async () => {
   try {
-    await seedDB();
+    await createDatabase();
     console.log("✅ Database ready");
   } catch (err) {
     console.error("⚠️ Database not ready yet, continuing...", err.message);
