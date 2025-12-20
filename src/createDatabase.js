@@ -1,7 +1,7 @@
 const con = require("./connector");
 const data = require("./data");
 
-async function seedDB() {
+async function createDatabase() {
   try {
     // Create table if it doesn't exist
     await new Promise((resolve, reject) => {
@@ -45,4 +45,4 @@ async function seedDB() {
   }
 }
 
-module.exports = seedDB;
+module.exports = createDatabase;
