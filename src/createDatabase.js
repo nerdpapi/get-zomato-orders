@@ -26,8 +26,6 @@ async function createDatabase() {
       console.log("ℹ️ Orders already seeded");
       return;
     }
-
-    // Insert data safely
     for (const item of data) {
       await new Promise((resolve, reject) => {
         con.query(
