@@ -74,7 +74,7 @@ app.get("/api/orders", (req, res) => {
   );
 });
 
-// ---------------- SWAGGER ----------------
+//SWAGGER
 swaggerDocs(app);
 
 // ---------------- SERVER START ----------------
